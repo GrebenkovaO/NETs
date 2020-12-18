@@ -149,6 +149,9 @@ def index(for_print=[], error=0):
 
 @app.route("/rnn", methods=['POST'])
 def rnn():
+    uploaded_file = request.files['file']
+    if uploaded_file.filename != '':
+        uploaded_file.save(uploaded_file.filename)
     command = request.form['text1']
     command2 = request.form['text2']
     command3 = request.form['text3']
@@ -168,7 +171,7 @@ def rnn():
         global graph
         with graph.as_default():
             set_session(sess)
-            for_print = s.segm(encoder, decoder, command, command2)
+            for_print = s.segm(encoder, decoder, uploaded_file.filename, command2)
             # keras.backend.clear_session()
         return index(for_print)
     '''else:
