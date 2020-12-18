@@ -18,6 +18,9 @@ from io import BytesIO
 from torchvision import transforms
 from matplotlib import pyplot as plt
 
+WIDTH = 500
+HEIGHT = 400
+
 sess = tf.Session()
 graph = tf.compat.v1.get_default_graph()  
 set_session(sess)
