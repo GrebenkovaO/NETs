@@ -143,19 +143,42 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def index(for_print=[], error=0):
-    return render_template('index.html', for_print=for_print, error=error)
-
+def index(for_print=[], error=0, images = []):
+#     print(images)
+    return render_template('index.html', for_print=for_print, error=error, images = images)
 
 @app.route("/rnn", methods=['POST'])
 def rnn():
-    uploaded_file = request.files['file']
+    
+    uploaded_file = request.files['image_file']
     if uploaded_file.filename != '':
-        uploaded_file.save(uploaded_file.filename)
+#         image better save to folder
+        uploaded_file.save('static/input.' + uploaded_file.filename.split('.')[-1])
     command = request.form['text1']
     command2 = request.form['text2']
     command3 = request.form['text3']
     global graph
+    
+    images = []
+    for root, dirs, files in os.walk('.'):
+        for filename in [os.path.join(root, name) for name in files]:
+            if not filename.endswith('.jpg'):
+                continue
+            im = Image.open(filename)
+            w, h = im.size
+            aspect = 1.0*w/h
+            if aspect > 1.0*WIDTH/HEIGHT:
+                width = min(w, WIDTH)
+                height = width/aspect
+            else:
+                height = min(h, HEIGHT)
+                width = height*aspect
+            images.append({
+                'width': int(width),
+                'height': int(height),
+                'src': filename
+            })
+
 
     # return request.form['text'] + " Command executed via subprocess"
     if command:
@@ -173,11 +196,11 @@ def rnn():
             set_session(sess)
             for_print = s.segm(encoder, decoder, uploaded_file.filename, command2)
             # keras.backend.clear_session()
-        return index(for_print)
+        return index(for_print, images=images)
     '''else:
-            return index(error=3)
+            return index(error=3, images=images)
     else:
-        return index(error=1)'''
+        return index(error=1, images=images)'''
 
 
 
