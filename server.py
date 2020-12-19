@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, flash, redirect, send_from_directory
 import sys
 from tensorflow.python.keras.backend import set_session
 import tensorflow as tf
@@ -17,11 +17,13 @@ import requests
 from io import BytesIO
 from torchvision import transforms
 from matplotlib import pyplot as plt
+from werkzeug.utils import secure_filename
+import os
 
 WIDTH = 500
 HEIGHT = 400
 
-sess = tf.Session()
+sess = tf.compat.v1.Session()
 graph = tf.compat.v1.get_default_graph()  
 set_session(sess)
 
@@ -141,29 +143,29 @@ with open('encoder.bin', 'rb') as fin:
 with open('decoder.bin', 'rb') as fin:
     decoder = pickle.load(fin)
 
-
 app = Flask(__name__)
 
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1
+
+UPLOAD_FOLDER = 'images'
+ALLOWED_EXTENSIONS = {'png', 'png'}
+
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+app.secret_key = 'super super secret key'
+
+@app.route('/images/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename)
 
 @app.route("/")
-def index(for_print=[], error=0, images = []):
-#     print(images)
-    return render_template('index.html', for_print=for_print, error=error, images = images)
+def index(for_print=[], error=0):
+    print(for_print)
 
-@app.route("/rnn", methods=['POST'])
-def rnn():
-    
-    uploaded_file = request.files['image_file']
-    if uploaded_file.filename != '':
-#         image better save to folder
-        uploaded_file.save('static/input.' + uploaded_file.filename.split('.')[-1])
-    command = request.form['text1']
-    command2 = request.form['text2']
-    command3 = request.form['text3']
-    global graph
-    
     images = []
-    for root, dirs, files in os.walk('.'):
+    for root, dirs, files in os.walk(app.config['UPLOAD_FOLDER']):
         for filename in [os.path.join(root, name) for name in files]:
             if not filename.endswith('.jpg'):
                 continue
@@ -182,10 +184,33 @@ def rnn():
                 'src': filename
             })
 
+    return raise_global_error() #render_template('index.html', for_print=for_print, error=error, images = images)
+
+@app.route("/")
+def raise_global_error():
+    return render_template('error.html')
+
+@app.route("/rnn", methods=['POST'])
+def rnn(**args):
+    
+
+    if 'image_file' not in request.files:
+        flash('No file part')
+    file = request.files['image_file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        flash('No selected file')
+    if file:
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'input.' + filename.split('.')[-1]))
+        # return raise_global_error()
+
+    command = request.form['text1']
+    global graph
 
     # return request.form['text'] + " Command executed via subprocess"
-    if command:
-        '''if int(command) > 15000:
+    '''if int(command) > 15000:
             return index(error=2)
         if command3.isdigit():
             if int(command3)>150000:
@@ -193,18 +218,27 @@ def rnn():
             if len(command2)>20:
                 return index(error=5)'''
 
-        global sess
-        global graph
-        with graph.as_default():
-            set_session(sess)
-            for_print = s.segm(encoder, decoder, uploaded_file.filename, command2)
-            # keras.backend.clear_session()
-        return index(for_print, images=images)
+    global sess
+    global graph
+    with graph.as_default():
+        set_session(sess)
+        for_print = s.segm(encoder, decoder, './images/input.jpg', command)
+        # keras.backend.clear_session()
+        for_print = 25
+    return index(for_print=for_print)
     '''else:
-            return index(error=3, images=images)
+            return index(error=3)
     else:
-        return index(error=1, images=images)'''
+        return index(error=1)'''
+ 
 
+@app.after_request
+def add_header(response):
+    # response.cache_control.no_store = True
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
 
 
 if __name__ == "__main__":

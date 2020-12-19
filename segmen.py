@@ -131,14 +131,14 @@ class FADPNDecoder(nn.Module):
         x = self.decoder4(x + self.fa4(torch.cat(acts[0], dim=1)))
         return x
 
-def segm(encoder, decoder, URL, path):
-
+def segm(encoder, decoder, path='0', URL= '0'):
+	if path!='0':
 	# from file
-	#img = default_loader(path)
-
-	# from URL
-	response = requests.get(URL)
-	img = Image.open(BytesIO(response.content))
+		img = default_loader(path)
+	else:
+		# from URL
+		response = requests.get(URL)
+		img = Image.open(BytesIO(response.content))
 
 	old_size = img.size
 	to_tensor = transforms.ToTensor()
@@ -151,7 +151,7 @@ def segm(encoder, decoder, URL, path):
 
 	result = Image.fromarray((out[0][0] > 1).numpy())
 	result = result.resize(old_size)
-	result.save('result.jpg')
+	result.save('./images/result.jpg')
 	return result
 
 
