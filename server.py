@@ -184,7 +184,7 @@ def index(for_print=[], error=0):
                 'src': filename
             })
 
-    return raise_global_error() #render_template('index.html', for_print=for_print, error=error, images = images)
+    return render_template('index.html', for_print=for_print, error=error, images = images) #raise_global_error() 
 
 @app.route("/")
 def raise_global_error():
