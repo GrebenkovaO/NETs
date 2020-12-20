@@ -219,7 +219,7 @@ def generate_caption(features_net, network, image, caption_prefix = ("#START#",)
         if next_word=="#END#":
             break
 
-    return ' '.join(caption_prefix[1:-1])
+    return caption_prefix[1:-1]
 
 
 def capt(network, features_net, path='0', URL=''):
