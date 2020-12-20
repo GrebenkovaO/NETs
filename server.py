@@ -9,7 +9,6 @@ import torch
 import torch.nn as nn
 import torchvision
 import torch.nn.functional as F
-import pickle
 from torchvision.datasets.folder import default_loader
 from typing import List
 from PIL import Image
@@ -19,6 +18,8 @@ from torchvision import transforms
 from matplotlib import pyplot as plt
 from werkzeug.utils import secure_filename
 import os
+from img2cap import as_matrix, ScaledDotProductScore, Attention, CaptionNet, BeheadedVGG19, capt
+
 
 WIDTH = 500
 HEIGHT = 400
@@ -26,6 +27,7 @@ HEIGHT = 400
 sess = tf.compat.v1.Session()
 graph = tf.compat.v1.get_default_graph()  
 set_session(sess)
+
 
 class FA(nn.Module):
     def __init__(self, num_ch):
@@ -138,6 +140,20 @@ class FADPNDecoder(nn.Module):
         x = self.decoder4(x + self.fa4(torch.cat(acts[0], dim=1)))
         return x
 
+with open('vocab.bin', 'rb') as fin:
+    vocab = pickle.load(fin)
+with open('word_to_index.bin', 'rb') as fin:
+    word_to_index = pickle.load(fin)
+
+eos_ix = word_to_index['#END#']
+unk_ix = word_to_index['#UNK#']
+pad_ix = word_to_index['#PAD#']
+
+with open('network.bin', 'rb') as fin:
+            network = pickle.load(fin)
+with open('features_net.bin', 'rb') as fin:
+            features_net = pickle.load(fin)
+
 with open('encoder.bin', 'rb') as fin:
     encoder = pickle.load(fin)
 with open('decoder.bin', 'rb') as fin:
@@ -161,13 +177,13 @@ def uploaded_file(filename):
                                filename)
 
 @app.route("/")
-def index(for_print=[], error=0):
+def index(for_print=0, error=0, cap_print = 0):
     print(for_print)
 
     images = []
     for root, dirs, files in os.walk(app.config['UPLOAD_FOLDER']):
         for filename in [os.path.join(root, name) for name in files]:
-            if not filename.endswith('.jpg'):
+            if not filename.endswith('.jpg') and not filename.endswith('.png') and not filename.endswith('.jpeg') :
                 continue
             im = Image.open(filename)
             w, h = im.size
@@ -183,8 +199,12 @@ def index(for_print=[], error=0):
                 'height': int(height),
                 'src': filename
             })
+    #if for_print == 0:
+    #    a = 'start.html'
+    #elif for_print == 25:
+    #    a = 'index.html''''
 
-    return render_template('index.html', for_print=for_print, error=error, images = images) #raise_global_error() 
+    return render_template('caption.html', for_print=for_print, error=error, images = images, cap_print = cap_print) #raise_global_error() 
 
 @app.route("/")
 def raise_global_error():
@@ -192,7 +212,9 @@ def raise_global_error():
 
 @app.route("/rnn", methods=['POST'])
 def rnn(**args):
-    
+    file_names = list(os.walk('./images'))[0][2]
+    for fn in file_names:
+        os.remove(os.path.join('./images', fn))
 
     if 'image_file' not in request.files:
         flash('No file part')
@@ -231,6 +253,50 @@ def rnn(**args):
     else:
         return index(error=1)'''
  
+@app.route("/caption", methods=['POST'])
+def caption(**args):
+    file_names = list(os.walk('./images'))[0][2]
+    for fn in file_names:
+        os.remove(os.path.join('./images', fn))
+
+    if 'image_file' not in request.files:
+        flash('No file part')
+    file = request.files['image_file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        flash('No selected file')
+    if file:
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'input.' + filename.split('.')[-1]))
+        # return raise_global_error()
+
+    command = request.form['text1']
+    global graph
+
+    # return request.form['text'] + " Command executed via subprocess"
+    '''if int(command) > 15000:
+            return index(error=2)
+        if command3.isdigit():
+            if int(command3)>150000:
+                return index(error=4)
+            if len(command2)>20:
+                return index(error=5)'''
+
+    global sess
+    global graph
+    with graph.as_default():
+        set_session(sess)
+        cap_print = capt(network, features_net, './images/input.jpg', command)
+        # keras.backend.clear_session()
+        for_print = 25
+    return index(for_print=for_print, cap_print = cap_print)
+    '''else:
+            return index(error=3)
+    else:
+        return index(error=1)'''
+ 
+
 
 @app.after_request
 def add_header(response):

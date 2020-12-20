@@ -17,7 +17,7 @@ import requests
 from io import BytesIO
 from torchvision import transforms
 from matplotlib import pyplot as plt
-
+import gc
 
 
 class FA(nn.Module):
@@ -132,13 +132,16 @@ class FADPNDecoder(nn.Module):
         return x
 
 def segm(encoder, decoder, path='0', URL= '0'):
-	if path!='0':
-	# from file
-		img = default_loader(path)
-	else:
+	if URL!='0':
 		# from URL
 		response = requests.get(URL)
 		img = Image.open(BytesIO(response.content))
+		img.save('./images/input.jpg')
+	
+	else:
+		# from file
+		img = default_loader(path)
+		
 
 	old_size = img.size
 	to_tensor = transforms.ToTensor()
@@ -152,6 +155,7 @@ def segm(encoder, decoder, path='0', URL= '0'):
 	result = Image.fromarray((out[0][0] > 1).numpy())
 	result = result.resize(old_size)
 	result.save('./images/result.jpg')
+	gc.collect()
 	return result
 
 

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <script type="text/javascript"></script>
+    <meta charset="UTF-8">
+    <title>Remote command UI</title>
+   <style>
+
+     .btn {
+	position: relative;
+    overflow: hidden;
+    z-index: 1;
+	padding: 10px 40px;
+	margin: 0 20px;
+	font-family: 'Montserrat Alternates', sans-serif;
+    font-weight: 600;
+    line-height: 30px;
+    color: black;
+    font-size: 20px;
+    text-transform: uppercase;
+	background: lightsteelblue;
+	border-width: 0;
+    box-shadow: 5px 5px 0 #532831;
+	outline: none;
+	cursor: pointer;
+    transition: 1.5s;
+}
+.btn:before,
+.btn:after {
+	content: "";
+	position: absolute;
+    height: 200px;
+    left: -50%;
+    margin-top: -100px;
+    top: 50%;
+    width: 200px;
+	border-radius: 50%;
+    opacity: 0.3;
+    z-index: -1;
+    transform: scale(0);
+}
+.btn:before {
+	background: #fdeede;
+    transition: .8s ease-out;
+}
+.btn:after {
+    transition: .4s ease-in .3s;
+}
+.btn:hover {
+    color: #532831;
+}
+.btn:hover:before,
+.btn:hover:after{
+    opacity: 1;
+    transform: scale(4);
+}
+
+
+h1 {
+    font-family: 'Montserrat Alternates', sans-serif;
+    text-transform: uppercase;
+    background: lightsteelblue;
+    color: black;
+    font-size: 30px;
+    padding: 10px 40px;
+    margin: 0 0px;
+
+   }
+
+      #footer {
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: lightsteelblue; /* Цвет фона */
+    color: black; /* Цвет текста */
+    width: 100%; /* Ширина слоя */
+   }
+
+
+
+   </style>
+    <center><h1> Вывод содержания картинки </h1></center>
+
+
+
+</head>
+
+<body>
+
+<style>
+    body {
+    background-image: url({{ url_for('static', filename='background.png') }});
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-size: 100%;
+}
+</style>
+
+
+<br><br>
+<form action="/caption" method="POST" enctype=multipart/form-data>
+    <center style="color:aliceblue">
+    <input type="file" name="image_file" accept=".png,.jpeg,.jpg">
+    </center>
+    <!-- <p><input type="submit" value="Submit"></p> -->
+    
+    <br><br><br><br><br><br>
+    <center style="color:aliceblue"> Ссылка на картинку  &nbsp;<input name="text1" size = "25" placeholder="1"> </center>
+    <br>
+    <!-- <center><input type="submit" style= "width:100x;height:75px" value="Rnn"></center-->
+
+
+    <center><button class="btn" type="submit" value="Rnn" style="width:280px;height:80px">
+       <center> Давай выводи уже!!!</center>
+    </button></center>
+</form>
+
+
+<br> <br> <br>
+
+{%if for_print == 25%}
+<center>
+<h1 style="color:aliceblue" >Готово!</h1></center>
+<center>
+{%for item in cap_print%}
+    <br>
+    <center>{{item}}</center>
+{% endfor %}
+</center>
+{%endif%}
+</center>
+
+{%if error == 2%}
+<center><h1 style="color:#ff0000"  >СЛИШКОМ МНОГО АНЕКДОТОВ</h1></center>
+{%endif%}
+{%if error == 3%}
+<center><h1 style="color:#ff0000"  >ВВЕДИТЕ ЦЕЛОЕ КОЛИЧЕСТВО БУКВ</h1></center>
+{%endif%}
+{%if error == 4%}
+<center><h1 style="color:#ff0000"  >СЛИШКОМ ДЛИННЫЙ АНЕКДОТ ХОЧЕШЬ</h1></center>
+{%endif%}
+{%if error == 5%}
+<center><h1 style="color:#ff0000"  >СЛИШКОМ ДЛИННОЕ НАЧАЛЬНОЕ СЛОВО</h1></center>
+{%endif%}
+
+<div id="footer">
+   <center>
+    &copy;Гребенькова, Савельев, Харь, Шокоров </a> </center>
+  </div>
+
+
+
+</body>
+</html>
+
+

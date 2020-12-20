@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <script type="text/javascript"></script>
+    <meta charset="UTF-8">
+    <title>Remote command UI</title>
+   <style>
+
+.button {
+	position: relative;
+    overflow: hidden;
+    z-index: 1;
+	padding: 10px 40px;
+	margin: 0 20px;
+	font-family: 'Montserrat Alternates', sans-serif;
+    font-weight: 600;
+    line-height: 30px;
+    color: black;
+    font-size: 20px;
+    text-transform: uppercase;
+	background: lightsteelblue;
+	border-width: 0;
+    box-shadow: 5px 5px 0 #532831;
+	outline: none;
+	cursor: pointer;
+    transition: 1.5s;
+}
+     .btn {
+	position: relative;
+    overflow: hidden;
+    z-index: 1;
+	padding: 10px 40px;
+	margin: 0 20px;
+	font-family: 'Montserrat Alternates', sans-serif;
+    font-weight: 600;
+    line-height: 30px;
+    color: black;
+    font-size: 20px;
+    text-transform: uppercase;
+	background: lightsteelblue;
+	border-width: 0;
+    box-shadow: 5px 5px 0 #532831;
+	outline: none;
+	cursor: pointer;
+    transition: 1.5s;
+}
+.btn:before,
+.btn:after {
+	content: "";
+	position: absolute;
+    height: 200px;
+    left: -50%;
+    margin-top: -100px;
+    top: 50%;
+    width: 200px;
+	border-radius: 50%;
+    opacity: 0.3;
+    z-index: -1;
+    transform: scale(0);
+}
+.btn:before {
+	background: #fdeede;
+    transition: .8s ease-out;
+}
+.btn:after {
+    transition: .4s ease-in .3s;
+}
+.btn:hover {
+    color: #532831;
+}
+.btn:hover:before,
+.btn:hover:after{
+    opacity: 1;
+    transform: scale(4);
+}
+
+
+h1 {
+    font-family: 'Montserrat Alternates', sans-serif;
+    text-transform: uppercase;
+    background: lightsteelblue;
+    color: black;
+    font-size: 30px;
+    padding: 10px 40px;
+    margin: 0 0px;
+
+   }
+
+      #footer {
+    position: fixed; /* Фиксированное положение */
+    left: 0; bottom: 0; /* Левый нижний угол */
+    padding: 10px; /* Поля вокруг текста */
+    background: lightsteelblue; /* Цвет фона */
+    color: black; /* Цвет текста */
+    width: 100%; /* Ширина слоя */
+   }
+
+
+
+   </style>
+    <center><h1>  Проект по сетевым технологиям 7 семестр </h1></center>
+
+
+
+</head>
+
+<body>
+
+<style>
+    body {
+    background-image: url({{ url_for('static', filename='background.png') }});
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-size: 100%;
+}
+</style>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="refresh" content="4";>
+<script type="text/javascript" src="jquery.js"></script> 
+<link href="style/style5.css" type="text/css" rel="stylesheet"> 
+</head>
+ 
+<body>
+    <div id="wrapper">
+    <div id="header">
+    <div class="minima">Minima</div>
+    <div id="sidebar">
+     <ul id="menu">
+     <center style="color:aliceblue">
+     <input id="but1" type="button" value="Cегментирование портретов" style="width:280px;height:80px" />
+     <input id="but2" type="button" value="Распознавание картинки" style="width:280px;height:80px"/>
+     </center>
+     <script>  
+        $(document).ready(function(){  
+          
+            $('#btn1').click(function(){  
+                $.ajax({  
+                    url: "./templates/index.html",  
+                    cache: false,  
+                    success: function(html){  
+                        $("#content").html(html);  
+                    }  
+                });  
+            });  
+             $('#btn2').click(function(){  
+                $.ajax({  
+                    url: "./templates/error.html",  
+                    cache: false,  
+                    success: function(html){  
+                        $("#content").html(html);  
+                    }  
+                });  
+            });   
+           
+    </script>
+
+
+
+<div id="footer">
+   <center>
+    &copy;Гребенькова, Савельев, Харь, Шокоров </a> </center>
+  </div>
+
+
+
+</body>
+</html>
+
+
