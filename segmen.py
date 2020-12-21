@@ -131,8 +131,8 @@ class FADPNDecoder(nn.Module):
         x = self.decoder4(x + self.fa4(torch.cat(acts[0], dim=1)))
         return x
 
-def segm(encoder, decoder, path='0', URL= '0'):
-	if URL!='0':
+def segm(encoder, decoder, path='0', URL= ''):
+	if URL!='':
 		# from URL
 		response = requests.get(URL)
 		img = Image.open(BytesIO(response.content))
